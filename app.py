@@ -1,17 +1,22 @@
 from flask import Flask, redirect, render_template, request, url_for
 from sqlalchemy import select
-
-from database import SessionLocal
+from werkzeug.security import check_password_hash
+from database import sessao
 from models import User, Book
 
 app = Flask(__name__)
-
-@app.route("/")
+app.secret_key = 'roberto'
+@app.route("/", methods=['POST', 'GET'])
 def index():
-    session = SessionLocal()
-    usuarios = session.scalars(select(User)).all()
-    livros = session.scalars(select(Book)).all()
-    return render_template("index.html")
+    session = sessao
+    if request.method == 'POST':
+        email = request.form.get('email')
+        senha = request.form.get('senha')
+        senha = check_password_hash(password=senha)
+        usuario = session.scalars(select(User).where(email=email,senha=senha))
+        if usuario:
+            return redirect(url_for(listar_usuarios))
+    return render_template("login.html")
 
 @app.route("/usuario/novo", methods=["POST","GET"])
 def new_user():
@@ -20,7 +25,7 @@ def new_user():
         email = request.form.get("email", None)
 
         if nome and email:
-            session = SessionLocal()
+            session = sessao
             usuario = session.scalars(select(User).where(User.email==email))
 
             if not usuario:
@@ -38,7 +43,7 @@ def new_book():
         user_id = request.form.get("user_id")
 
         if titulo and user_id:
-            session = SessionLocal()
+            session = sessao
             livro = session.scalars(select(Book).where(Book.titulo == titulo)).first()
 
             if not livro:
@@ -51,15 +56,13 @@ def new_book():
 
 @app.route("/livros/listar")
 def listar_livro():
-    session = SessionLocal()
+    session = sessao
     livros = session.scalars(select(Book).order_by(Book.titulo)).all()
     return render_template("index.html", livros=livros)
 
 
 @app.route("/usuarios/listar")
 def listar_usuarios():
-    session = SessionLocal()
+    session = sessao
     usuarios = session.scalars(select(User).order_by(User.nome)).all()
     return render_template("index.html", usuarios=usuarios)
-
-

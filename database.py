@@ -1,10 +1,10 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import DeclarativeBase, sessionmaker, Session
+from sqlalchemy.orm import DeclarativeBase, Session
 
 class Base(DeclarativeBase):
     pass
 
 engine = create_engine("sqlite:///biblioteca.db", echo=False)
+Base.metadata.create_all(engine)
 
-SessionLocal = sessionmaker(bind=engine)
-session = Session()
+sessao = Session(bind=engine)

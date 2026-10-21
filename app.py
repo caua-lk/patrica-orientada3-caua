@@ -2,7 +2,7 @@ from flask import Flask, redirect, render_template, request, url_for
 from sqlalchemy import select
 
 from database import SessionLocal
-from models import Book, User
+from models import User, Book
 
 app = Flask(__name__)
 
@@ -11,9 +11,9 @@ def index():
     session = SessionLocal()
     usuarios = session.scalars(select(User)).all()
     livros = session.scalars(select(Book)).all()
-    return render_template()
+    return render_template("index.html")
 
-@app.route("/usuario/novo" methods=["POST","GET"])
+@app.route("/usuario/novo", methods=["POST","GET"])
 def new_user():
     if request.method == "POST":
         nome = request.form.get("nome", None)
